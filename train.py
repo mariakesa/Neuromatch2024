@@ -27,8 +27,9 @@ def train(env, agent, n_episodes):
         state = one_hot_encode(state, env.observation_space.n)
         done = False
         score = 0
+        hidden = agent.q_network.init_hidden(1).to(agent.device)
         while not done:
-            hidden = agent.q_network.init_hidden(1).to(agent.device)
+            # hidden = agent.q_network.init_hidden(1).to(agent.device)
             # Choose action based on epsilon-greedy policy
             action, hidden = agent.choose_action(state, hidden)
             next_state, reward, done, info = agent.env.step(
