@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import numpy as np
 
 # RNN for approximating Q-values
 
@@ -49,6 +50,7 @@ class RNNQNetworkEmbeddings(nn.Module):
 
 import torch
 import torch.nn as nn
+import numpy as np
 
 
 class TransformerDecoderQNetwork(nn.Module):
@@ -72,6 +74,7 @@ class TransformerDecoderQNetwork(nn.Module):
 
         # Output layer
         self.output_layer = nn.Linear(hidden_dim, output_dim)
+        # print(self.output_layer.shape)
 
     def create_positional_encoding(self, max_seq_len, d_model):
         pos_enc = torch.zeros(max_seq_len, d_model)
@@ -94,6 +97,7 @@ class TransformerDecoderQNetwork(nn.Module):
 
         # Output Q-values
         output = self.output_layer(x)
+        print(output.shape)
         return output
 
 # Example instantiation
