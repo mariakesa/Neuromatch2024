@@ -6,12 +6,13 @@ import torch.optim as optim
 import random
 from collections import deque
 import matplotlib.pyplot as plt
+from networks import TransformerDecoderQNetwork
 
 # Deep Q-Learning Agent with RNN
 
 
 class DQNAgent:
-    def __init__(self, env, hidden_dim=64, learning_rate=0.001, discount_factor=0.99, epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.995, buffer_size=10000, batch_size=64, Network=RNNQNetwork):
+    def __init__(self, env, hidden_dim=64, learning_rate=0.001, discount_factor=0.99, epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.995, buffer_size=10000, batch_size=64, Network=TransformerDecoderQNetwork):
         self.env = env
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
