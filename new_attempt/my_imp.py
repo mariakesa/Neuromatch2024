@@ -49,7 +49,7 @@ class RNNQNetwork(nn.Module):
         return q_values, hidden
 
     def init_hidden(self, batch_size):
-        return torch.zeros(1, batch_size, self.hidden_size)
+        return torch.zeros(1, 1, self.hidden_size)
 
 
 class Agent:
@@ -77,7 +77,6 @@ class Agent:
         # print(rand)
         if rand > self.epsilon:
             with torch.no_grad():
-                # print(state.shape, hidden.shape)
                 q_values, hidden = self.q_network(
                     state.reshape(1, 1, -1), hidden)
                 action = q_values.max(2).indices.item()
@@ -188,25 +187,17 @@ class Agent:
         transitions = self.memory.sample(self.batch_size)
         batch = Transition(*zip(*transitions))
 
-        # print(batch.state[0].shape)
-        # Convert batch elements to tensors and reshape as needed
         states_tensor = torch.stack(
-            [torch.tensor(s, dtype=torch.float32) for s in batch.state]).unsqueeze(0).to(self.device)
+            [s.clone().detach().requires_grad_(True) for s in batch.state]).unsqueeze(0).to(self.device)
 
-        # print(states_tensor.shape)
-        # print(batch.hidden[0].shape)
         hidden_tensor = torch.stack(
-            [torch.tensor(h.squeeze(0).squeeze(0), dtype=torch.float32) for h in batch.hidden]).unsqueeze(0).to(self.device)
-        # [num_layers, batch_size, hidden_size]
-        # hidden_tensor = hidden_tensor.permute(1, 0, 2)
-        # print(hidden_tensor.shape)
+            [h.clone().detach().requires_grad_(True).squeeze(0).squeeze(0) for h in batch.hidden]).unsqueeze(0).to(self.device)
 
         next_states_tensor = torch.stack(
-            [torch.tensor(s, dtype=torch.float32) for s in batch.next_state]).unsqueeze(0).to(self.device)
-        # print(next_hidden_tensor.shape)
-        # print(next_states_tensor.shape)
+            [s.clone().detach().requires_grad_(True) for s in batch.next_state]).unsqueeze(0).to(self.device)
+
         next_hidden_tensor = torch.stack(
-            [torch.tensor(h.squeeze(0).squeeze(0), dtype=torch.float32) for h in batch.next_hidden]).unsqueeze(0).to(self.device)
+            [h.clone().detach().requires_grad_(True).squeeze(0).squeeze(0) for h in batch.next_hidden]).unsqueeze(0).to(self.device)
 
         with torch.no_grad():
             next_q_values, _ = self.q_network(
