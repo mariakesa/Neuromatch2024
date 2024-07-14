@@ -158,6 +158,17 @@ batch_size = 64
 lr = 0.001
 gamma = 0.99
 env = DelaySampleToMatchEnv()
+import gymnasium as gym
+# Example usage
+state_size = 16
+action_size = 4
+hidden_size = 64
+capacity = 10000
+batch_size = 64
+lr = 0.001
+gamma = 0.99
+env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)
+# print(env.reset())
 agent = Agent(state_size, action_size, hidden_size,
               capacity, batch_size, lr, gamma)
 
@@ -168,7 +179,8 @@ scores = []
 
 # Training loop
 for i in range(n_episodes):
-    state = env.reset()  # Reset the environment
+    state, _ = env.reset()  # Reset the environment
+    # print(state)
     state = F.one_hot(torch.tensor(state),
                       env.observation_space.n).to(dtype=torch.float32, device=agent.device)
     done = False
@@ -176,7 +188,7 @@ for i in range(n_episodes):
     hidden = agent.q_network.init_hidden(1).to(agent.device)
     while not done:
         action, next_hidden = agent.select_action(state, hidden)
-        next_state, reward, done, info = env.step(action)  # Take the action
+        next_state, reward, done, info, _ = env.step(action)  # Take the action
         next_state = F.one_hot(torch.tensor(next_state),
                                env.observation_space.n).to(dtype=torch.float32, device=agent.device)
         # ('state', 'action', 'next_state', 'reward', 'hidden', 'next_hidden', 'done'))
