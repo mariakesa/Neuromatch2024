@@ -31,7 +31,7 @@ class DelaySampleToMatchEnv(gym.Env):
             range(1, self.n_stimuli + 1), self.n_stimuli, replace=False)
         self.first_stimulus = stimuli[0]
         # Create the sequence: stimulus1-delay-stimulus2-delay-...-stimulusN-stimulus1
-        sequence = []
+        sequence = [0]
         for stimulus in stimuli:
             sequence.append(stimulus)
             sequence.extend([0] * self.delay_length)  # 0 represents the delay
@@ -53,11 +53,19 @@ class DelaySampleToMatchEnv(gym.Env):
         if action != 0 and self.sequence[self.current_step] == 0:
             reward = -1
 
+        if self.current_step < len(self.sequence) - 1:
+            if action != 0:
+                # print('boom')
+                reward = -1
+            else:
+                reward = 0
+
         # If the current step is the last one, check if the action matches the first stimulus
         if self.current_step == len(self.sequence) - 1:
             done = True
+            # print(self.sequence, self.sequence[self.current_step])
             if action == self.first_stimulus:
-                reward = 1
+                reward = 10
             else:
                 reward = -1
 

@@ -49,7 +49,7 @@ class RNNQNetwork(nn.Module):
         return q_values, hidden
 
     def init_hidden(self, batch_size):
-        return torch.zeros(1, 1, self.hidden_size)
+        return torch.ones(1, 1, self.hidden_size)
 
 
 class Agent:
@@ -88,97 +88,6 @@ class Agent:
         # ('state', 'action', 'next_state', 'reward', 'hidden', 'next_hidden', 'done'))
         self.memory.push(state, action, next_state,
                          reward, hidden, next_hidden, done)
-
-    def learn_(self):
-        if len(self.memory) < self.batch_size:
-            return
-
-        transitions = self.memory.sample(self.batch_size)
-        batch = Transition(*zip(*transitions))
-
-        for i in range(self.batch_size):
-            state = torch.tensor(batch.state[i]).reshape(
-                1, 1, -1).to(agent.device)
-            hidden = torch.tensor(batch.hidden[i]).to(agent.device)
-            next_states_tensor = torch.tensor(batch.next_state[i]).reshape(
-                1, 1, -1).to(dtype=torch.float32, device=agent.device)
-            rewards_tensor = torch.tensor(batch.reward[i]).to(agent.device)
-            actions_tensor = torch.tensor(batch.action[i]).to(agent.device)
-            dones_tensor = torch.tensor(batch.done[i]).to(agent.device)
-            next_hidden = torch.tensor(batch.next_hidden[i]).to(
-                dtype=torch.float32, device=agent.device)
-
-            # state_action_values, hidden = self.q_network(state, hidden)
-
-            current_q_values = self.q_network(
-                state, hidden)[0]
-
-            current_q_values = current_q_values.gather(
-                2, actions_tensor.unsqueeze(-1)).squeeze(-1)  # Shape (batch_size,
-            # print(current_q_values)
-            next_q_values = self.q_network(
-                next_states_tensor, next_hidden)[0].max(2).values
-            # print(next_q_values)
-            # actions=q_values.max(2).indices.item()
-            if dones_tensor == False:
-                dones_tensor = 0
-            else:
-                dones_tensor = 1
-            target_q_values = rewards_tensor + self.gamma * \
-                next_q_values * (1 - dones_tensor)
-
-            # print(current_q_values.shape, next_q_values.shape)
-
-            loss = self.criterion(current_q_values, target_q_values)
-
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-
-    def learn_(self):
-        if len(self.memory) < self.batch_size:
-            return
-
-        transitions = self.memory.sample(self.batch_size)
-        batch = Transition(*zip(*transitions))
-
-        for i in range(self.batch_size):
-            state = torch.tensor(batch.state[i]).reshape(
-                1, 1, -1).to(self.device)
-            hidden = torch.tensor(batch.hidden[i]).to(self.device)
-            next_states_tensor = torch.tensor(batch.next_state[i]).reshape(
-                1, 1, -1).to(dtype=torch.float32, device=self.device)
-            rewards_tensor = torch.tensor(batch.reward[i]).to(self.device)
-            actions_tensor = torch.tensor(batch.action[i]).to(self.device)
-            dones_tensor = torch.tensor(
-                batch.done[i], dtype=torch.float32).to(self.device)
-            next_hidden = torch.tensor(batch.next_hidden[i]).to(
-                dtype=torch.float32, device=self.device)
-
-            # Compute current Q-values and gather the Q-value for the action taken
-            current_q_values, _ = self.q_network(state, hidden)
-            current_q_values = current_q_values.gather(
-                2, actions_tensor.view(1, 1, 1)).squeeze(-1)  # Shape (1, 1)
-
-            # Compute next Q-values and take the max value across the action dimension
-            next_q_values, _ = self.q_network(next_states_tensor, next_hidden)
-            next_q_values = next_q_values.max(2)[0]  # Shape (1, 1)
-
-            # Compute target Q-values
-            target_q_values = rewards_tensor + self.gamma * \
-                next_q_values * (1 - dones_tensor)
-
-            # Ensure shapes are consistent for loss computation
-            current_q_values = current_q_values.squeeze(0)  # Shape (1)
-            target_q_values = target_q_values.squeeze(0)    # Shape (1)
-
-            # Compute the loss
-            loss = self.criterion(current_q_values, target_q_values)
-
-            # Optimize the model
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
 
     def learn(self):
         if len(self.memory) < self.batch_size:
@@ -253,7 +162,7 @@ agent = Agent(state_size, action_size, hidden_size,
               capacity, batch_size, lr, gamma)
 
 
-n_episodes = 1000
+n_episodes = 100000
 win_pct_list = []
 scores = []
 
