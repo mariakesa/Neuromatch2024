@@ -68,6 +68,7 @@ class Agent:
         self.q_network = RNNQNetwork(state_size, hidden_size, action_size)
         self.optimizer = optim.Adam(self.q_network.parameters(), lr=lr)
         self.criterion = nn.MSELoss()
+        # self.criterion = nn.SmoothL1Loss()
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.q_network.to(self.device)
@@ -148,12 +149,15 @@ class Agent:
         loss.backward()
         self.optimizer.step()
 
+        if self.epsilon > self.eps_end:
+            self.epsilon *= self.eps_decay
+
 
 # Example usage
 state_size = 6
 action_size = 6
 hidden_size = 64
-capacity = 10000
+capacity = 100000
 batch_size = 64
 lr = 0.001
 gamma = 0.99
