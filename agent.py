@@ -162,7 +162,7 @@ class TransformerDecoderQNetwork(nn.Module):
 # Deep Q-Learning Agent with Transformer
 
 
-class DQNAgent:
+class DQNAgentTransformer:
     def __init__(self, env, hidden_dim=64, learning_rate=0.001, discount_factor=0.99, epsilon=1.0, epsilon_min=0.01, epsilon_decay=0.995, buffer_size=10000, batch_size=64, max_seq_len=100, num_heads=8, num_layers=6):
         self.env = env
         self.learning_rate = learning_rate
