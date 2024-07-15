@@ -17,7 +17,7 @@ class DelaySampleToMatchEnv(gym.Env):
 
         # Action space and observation space
         # Stimuli are represented as integers from 0 to n_stimuli (0 is the delay)
-        self.action_space = spaces.Discrete(2)
+        self.action_space = spaces.Discrete(n_stimuli + 1)
         self.observation_space = spaces.Discrete(n_stimuli + 1)
 
         # Initialize the sequence and current step
@@ -64,7 +64,7 @@ class DelaySampleToMatchEnv(gym.Env):
         if self.current_step == len(self.sequence) - 1:
             done = True
             # print(self.sequence, self.sequence[self.current_step])
-            if action == 1:
+            if action == self.first_stimulus:
                 reward = 10
             else:
                 reward = -1

@@ -17,13 +17,16 @@ train_data = np.array([trainset[i][0].numpy() for i in range(len(trainset))])
 train_labels = np.array([trainset[i][1] for i in range(len(trainset))])
 
 class_dct = {}
-for i in range(0, 10):
-    class_dct[i] = np.where(train_labels == i)[0]
+for i in range(1, 11):
+    class_dct[i] = np.where(train_labels == i - 1)[0]
+
+black_image = torch.tensor(
+    np.zeros((1024,), dtype=np.float32)).to(device='cuda')
 
 # Randomly select one index from class_0_indices
 # for i in range(100):
-    # random_index = np.random.choice(10)
-    # print(random_index)
+# random_index = np.random.choice(10)
+# print(random_index)
 
 import torch
 import torch.nn as nn
@@ -207,7 +210,7 @@ class Agent:
 
 # Example usage
 state_size = 256
-action_size = 6
+action_size = 2
 hidden_size = 128
 capacity = 100000
 batch_size = 64
@@ -225,25 +228,48 @@ scores = []
 # Training loop
 for i in range(n_episodes):
     state = env.reset()  # Reset the environment
-    indices = class_dct[int(state)]
-    random_index = np.random.choice(indices)
-    state = torch.tensor(
-        train_data[random_index].flatten()).to(device=agent.device)
+    state_ = int(state)
+    if state_ != 0:
+        indices = class_dct[int(state)]
+        random_index = np.random.choice(indices)
+        state = torch.tensor(
+            train_data[random_index].flatten()).to(device=agent.device)
+    else:
+        state = torch.tensor(black_image).to(device=agent.device)
     done = False
     score = 0
     hidden = agent.q_network.init_hidden(1).to(agent.device)
+    counter = 0
     while not done:
+        if state_ == 0:
+            state = black_image
         action, next_hidden = agent.select_action(state, hidden)
         next_state, reward, done, info = env.step(action)  # Take the action
-        indices = class_dct[int(next_state)]
-        random_index = np.random.choice(indices)
-        next_state = torch.tensor(
-            train_data[random_index].flatten()).to(device=agent.device)
+        next_state_ = int(next_state)
+        if counter == 0:
+            first_stimulus = next_state
+            # print(first_stimulus)
+            indices = class_dct[int(next_state)]
+            random_index = np.random.choice(indices)
+            memory_state = torch.tensor(
+                train_data[random_index].flatten()).to(device=agent.device)
+        if first_stimulus != next_state:
+            if next_state_ == 0:
+                next_state = torch.tensor(black_image).to(device=agent.device)
+            else:
+                indices = class_dct[int(next_state)]
+                random_index = np.random.choice(indices)
+                next_state = torch.tensor(
+                    train_data[random_index].flatten()).to(device=agent.device)
+        else:
+            next_state = memory_state
+        counter += 1
         # ('state', 'action', 'next_state', 'reward', 'hidden', 'next_hidden', 'done'))
         agent.store_transition(state, action, next_state,
                                reward, hidden, next_hidden, done)
         agent.learn()  # Update Q-network
         hidden = next_hidden
+        state_ = next_state_
         state = next_state  # Move to the next state
         score += reward
     scores.append(score)
@@ -255,4 +281,4 @@ for i in range(n_episodes):
 torch.save({
     'model_state_dict': agent.q_network.state_dict(),
     'optimizer_state_dict': agent.optimizer.state_dict(),
-}, 'rnn_q_network.pth')
+}, 'rnn_q_network_variation.pth')
