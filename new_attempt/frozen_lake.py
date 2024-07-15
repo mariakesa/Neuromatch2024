@@ -148,12 +148,15 @@ class Agent:
         loss.backward()
         self.optimizer.step()
 
+        if self.epsilon > self.eps_end:
+            self.epsilon *= self.eps_decay
+
 
 # Example usage
 state_size = 6
 action_size = 6
 hidden_size = 64
-capacity = 10000
+capacity = 100000
 batch_size = 64
 lr = 0.001
 gamma = 0.99
@@ -163,8 +166,8 @@ import gymnasium as gym
 state_size = 16
 action_size = 4
 hidden_size = 64
-capacity = 10000
-batch_size = 64
+capacity = 100000
+batch_size = 32
 lr = 0.001
 gamma = 0.99
 env = gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=False)
@@ -173,7 +176,7 @@ agent = Agent(state_size, action_size, hidden_size,
               capacity, batch_size, lr, gamma)
 
 
-n_episodes = 100000
+n_episodes = 10000
 win_pct_list = []
 scores = []
 

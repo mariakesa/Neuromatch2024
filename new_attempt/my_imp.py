@@ -6,6 +6,7 @@ import numpy as np
 from collections import namedtuple, deque
 from environment import DelaySampleToMatchEnv
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 # Define the Transition namedtuple
 Transition = namedtuple(
@@ -166,7 +167,7 @@ agent = Agent(state_size, action_size, hidden_size,
               capacity, batch_size, lr, gamma)
 
 
-n_episodes = 100000
+n_episodes = 4000
 win_pct_list = []
 scores = []
 
@@ -195,3 +196,9 @@ for i in range(n_episodes):
     if i % 100 == 0:
         avg_score = np.mean(scores[-100:])
         print(f"Episode {i} - Average Score: {avg_score:.2f}")
+
+plt.plot(win_pct_list)
+plt.xlabel('Episodes (x100)')
+plt.ylabel('Win Percentage')
+plt.title('Win Percentage over Time')
+plt.show()
