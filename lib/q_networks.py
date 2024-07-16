@@ -16,3 +16,32 @@ class RNNQNetwork(nn.Module):
 
     def init_hidden(self, batch_size):
         return torch.ones(1, 1, self.hidden_size)
+
+
+class GRUQNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(GRUQNetwork, self).__init__()
+        self.hidden_size = hidden_size
+        self.rnn = nn.LSTM(input_size, hidden_size)
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x, hidden):
+        out, hidden = self.rnn(x, hidden)
+        q_values = self.fc(out)
+        return q_values, hidden
+
+
+class LSTMQNetwork(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(LSTMQNetwork, self).__init__()
+        self.hidden_size = hidden_size
+        self.rnn = nn.LSTM(input_size, hidden_size)
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x, hidden):
+        out, hidden = self.rnn(x, hidden)
+        q_values = self.fc(out)
+        return q_values, hidden
+
+    def init_hidden(self, batch_size):
+        return torch.ones(1, 1, self.hidden_size)

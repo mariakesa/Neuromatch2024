@@ -12,9 +12,13 @@ config_dict = {
     'batch_size': 64,
     'lr': 0.001,
     'gamma': 0.99,
+    'model_path': 'model.pth',
+    'mode': 'train-from-zero'
 }
 
 # q_network, loss, state_size, action_size, hidden_size, capacity, batch_size, lr, gamma
 # env = DelaySampleToMatchEnv()
 
 agent = DQNAgent(config_dict)
+
+agent.load_model(mode='eval')

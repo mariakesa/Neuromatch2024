@@ -30,13 +30,17 @@ class ReplayMemory:
 
 
 class DQNAgent(nn.Module):
-    def __init__(self, config_dict, mode='train-from-zero'):
-        if mode == 'train-from-zero':
-            self.q_network = config_dict['q_network'].__init__(
+    def __init__(self, config_dict):
+        super(DQNAgent, self).__init__()
+        self.save_path = config_dict['model_path']
+        self.load_path = config_dict['model_path']
+        # possible modes: 'train-from-zero', 'train', 'eval'
+        if config_dict['mode'] == 'train-from-zero':
+            self.q_network = config_dict['q_network'](
                 config_dict['state_size'], config_dict['hidden_size'], config_dict['action_size'])
         else:
             self.q_network = self.load_model(
-                config_dict['model_path'], mode=mode)
+                mode=config_dict['mode'])
         self.memory = config_dict['loss'](config_dict['capacity'])
         self.batch_size = config_dict.get('batch_size', 64)
         self.gamma = config_dict.get('gamma', 0.99)
@@ -54,14 +58,20 @@ class DQNAgent(nn.Module):
 
         self.q_network.to(self.device)
 
-    def load_model(self, model_path, mode):
-        checkpoint = torch.load(model_path)
+    def load_model(self, mode):
+        checkpoint = torch.load(self.load_path)
         self.q_network.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        if mode == 'test':
+        if mode == 'eval':
             self.q_network.eval()
         else:
             self.q_network()
+
+    def save_model(self):
+        torch.save({
+            'model_state_dict': self.q_network.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict()
+        }, self.save_path)
 
     def select_action(self, state, hidden):
         rand = random.random()
