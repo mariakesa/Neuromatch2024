@@ -19,10 +19,19 @@ config_dict = {
 # q_network, loss, state_size, action_size, hidden_size, capacity, batch_size, lr, gamma
 # env = DelaySampleToMatchEnv()
 
-#agent = DQNAgent(config_dict)
+# agent = DQNAgent(config_dict)
 
-#agent.load_model(mode='eval')
+# agent.load_model(mode='eval')
 
 from experiments import experiments
 
 print(experiments.keys())
+
+
+def run_experiment(experiment):
+    train = experiment['train_function']
+    train(experiment)
+
+
+myexp = experiments[('short-seq', 'easy-seq', 'MSELoss', 'RNN')]
+run_experiment(myexp)

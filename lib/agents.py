@@ -41,7 +41,7 @@ class DQNAgent(nn.Module):
         else:
             self.q_network = self.load_model(
                 mode=config_dict['mode'])
-        self.memory = config_dict['loss'](config_dict['capacity'])
+        self.memory = ReplayMemory(config_dict['capacity'])
         self.batch_size = config_dict.get('batch_size', 64)
         self.gamma = config_dict.get('gamma', 0.99)
         self.eps_start = config_dict.get('eps_start', 0.99)
@@ -49,6 +49,8 @@ class DQNAgent(nn.Module):
         self.eps_decay = config_dict.get('eps_decay', 0.995)
         self.epsilon = self.eps_start
         self.lr = config_dict.get('lr', 0.001)
+
+        self.action_size = config_dict['action_size']
 
         self.optimizer = config_dict.get('opt', optim.Adam)(
             self.q_network.parameters(), lr=self.lr)
@@ -83,6 +85,11 @@ class DQNAgent(nn.Module):
         else:
             action = random.randrange(self.action_size)
         return action, hidden
+
+    def store_transition(self, state, action, next_state, reward, hidden, next_hidden, done):
+        # ('state', 'action', 'next_state', 'reward', 'hidden', 'next_hidden', 'done'))
+        self.memory.push(state, action, next_state,
+                         reward, hidden, next_hidden, done)
 
     def learn(self):
         if len(self.memory) < self.batch_size:

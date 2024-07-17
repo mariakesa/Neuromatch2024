@@ -3,11 +3,6 @@ from agents import DQNAgent
 import torch.nn as nn
 from train import vanilla_train, mnist_train, cifar_train
 
-from q_networks import RNNQNetwork, LSTMQNetwork, GRUQNetwork
-from agents import DQNAgent
-import torch.nn as nn
-from train import vanilla_train, mnist_train, cifar_train
-
 # Define configurations and parameters
 configurations = [
     ("short-seq", "easy-seq"),
@@ -72,5 +67,10 @@ for seq_type, env_type in configurations:
             }
 
 # Print to verify
-for key, value in experiments.items():
-    print(key, value)
+# cntr = 0
+# for key, value in experiments.items():
+    # print(key, value)
+    # print(cntr)
+    # cntr += 1
+
+# Run experiments
