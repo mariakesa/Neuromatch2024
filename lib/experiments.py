@@ -3,154 +3,74 @@ from agents import DQNAgent
 import torch.nn as nn
 from train import vanilla_train, mnist_train, cifar_train
 
-# 6 different configurations
-# Short sequences-- 6 stimuli different stimuli (including blank):
-# Easy env
-# MNIST
-# CIFAR10
+from q_networks import RNNQNetwork, LSTMQNetwork, GRUQNetwork
+from agents import DQNAgent
+import torch.nn as nn
+from train import vanilla_train, mnist_train, cifar_train
 
-# Longish sequences-- 11 different stimuli (including blank):
-# Easy env
-# MNIST
-# CIFAR10
+# Define configurations and parameters
+configurations = [
+    ("short-seq", "easy-seq"),
+    ("short-seq", "mnist-seq"),
+    ("short-seq", "cifar-seq"),
+    ("long-seq", "easy-seq"),
+    ("long-seq", "mnist-seq"),
+    ("long-seq", "cifar-seq")
+]
 
-# Each of these categories has experimental variables:
-# RNN,LSTM,GRU
-# LSTM+MSELoss, LSTM+SmoothL1Loss
+networks = {
+    "RNN": RNNQNetwork,
+    "LSTM": LSTMQNetwork,
+    # "GRU": GRUQNetwork
+}
 
-# There are all together 6*4=24 models
+losses = {
+    "MSELoss": nn.MSELoss,
+    "SmoothL1Loss": nn.SmoothL1Loss
+}
 
-# Small sequences
+state_sizes = {
+    "short-seq": 6,
+    "long-seq": 11
+}
 
+train_functions = {
+    "easy-seq": vanilla_train,
+    "mnist-seq": mnist_train,
+    "cifar-seq": cifar_train
+}
+
+# Generate experiments dictionary
 experiments = {}
 
-# 1
-experiments[('short-seq', 'easy-seq', 'MSELoss', 'RNN')] = {
-    'q_network': RNNQNetwork,
-    'loss': nn.MSELoss,
-    'state_size': 6,
-    'action_size': 6,
-    'hidden_size': 64,
-    'capacity': 100000,
-    'batch_size': 32,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'short-seq_easy-seq_MSELoss_RNN.pth',
-    'mode': 'train-from-zero',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 2
-experiments[('short-seq', 'easy-seq', 'MSELoss', 'GRU')] = {
-    'q_network': GRUQNetwork,
-    'loss': nn.MSELoss,
-    'state_size': 6,
-    'action_size': 6,
-    'hidden_size': 64,
-    'capacity': 100000,
-    'batch_size': 32,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'short-seq_easy-seq_MSELoss_GRU.pth',
-    'mode': 'train-from-zero',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 3
-experiments[('short-seq', 'easy-seq', 'MSELoss', 'LSTM')] = {
-    'q_network': LSTMQNetwork,
-    'loss': nn.MSELoss,
-    'state_size': 6,
-    'action_size': 6,
-    'hidden_size': 64,
-    'capacity': 100000,
-    'batch_size': 32,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'short-seq_easy-seq_MSELoss_LSTM.pth',
-    'mode': 'train-from-zero',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 4
-experiments[('short-seq', 'easy-seq', 'L1SmoothLoss', 'LSTM')] = {
-    'q_network': LSTMQNetwork,
-    'loss': nn.SmoothL1Loss,
-    'state_size': 6,
-    'action_size': 6,
-    'hidden_size': 64,
-    'capacity': 100000,
-    'batch_size': 64,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'model.pth',
-    'mode': 'train-from-zero',
-    'model_path': 'short-seq_easy-seq_SmoothL1Loss_LSTM.pth',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 5
-experiments[('long-seq', 'easy-seq', 'MSELoss', 'RNN')] = {
-    'q_network': RNNQNetwork,
-    'loss': nn.MSELoss,
-    'state_size': 11,
-    'action_size': 11,
-    'hidden_size': 128,
-    'capacity': 100000,
-    'batch_size': 32,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'short-seq_easy-seq_MSELoss_RNN.pth',
-    'mode': 'train-from-zero',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 6
-experiments[('long-seq', 'easy-seq', 'MSELoss', 'GRU')] = {
-    'q_network': GRUQNetwork,
-    'loss': nn.MSELoss,
-    'state_size': 11,
-    'action_size': 11,
-    'hidden_size': 128,
-    'capacity': 100000,
-    'batch_size': 32,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'short-seq_easy-seq_MSELoss_GRU.pth',
-    'mode': 'train-from-zero',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 7
-experiments[('short-seq', 'easy-seq', 'MSELoss', 'LSTM')] = {
-    'q_network': LSTMQNetwork,
-    'loss': nn.MSELoss,
-    'state_size': 11,
-    'action_size': 11,
-    'hidden_size': 128,
-    'capacity': 100000,
-    'batch_size': 32,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'short-seq_easy-seq_MSELoss_LSTM.pth',
-    'mode': 'train-from-zero',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
-# 8
-experiments[('long-seq', 'easy-seq', 'L1SmoothLoss', 'LSTM')] = {
-    'q_network': LSTMQNetwork,
-    'loss': nn.SmoothL1Loss,
-    'state_size': 11,
-    'action_size': 11,
-    'hidden_size': 128,
-    'capacity': 100000,
-    'batch_size': 64,
-    'lr': 0.001,
-    'gamma': 0.99,
-    'model_path': 'model.pth',
-    'mode': 'train-from-zero',
-    'model_path': 'long-seq_easy-seq_SmoothL1Loss_LSTM.pth',
-    'train_function': vanilla_train,
-    'train_steps': 50000
-}
+for seq_type, env_type in configurations:
+    for loss_name, loss_fn in losses.items():
+        for net_name, net_class in networks.items():
+            config_key = (seq_type, env_type, loss_name, net_name)
+            state_size = state_sizes[seq_type]
+            action_size = state_size
+            hidden_size = 64 if seq_type == "short-seq" else 128
+            model_path = f"{seq_type}_{env_type}_{loss_name}_{net_name}.pth"
+            learning_curve_path = f"{seq_type}_{env_type}_{loss_name}_{net_name}.npy"
+            train_function = train_functions[env_type]
+
+            experiments[config_key] = {
+                'q_network': net_class,
+                'loss': loss_fn,
+                'state_size': state_size,
+                'action_size': action_size,
+                'hidden_size': hidden_size,
+                'capacity': 100000,
+                'batch_size': 32,
+                'lr': 0.001,
+                'gamma': 0.99,
+                'model_path': model_path,
+                'learning_curve_path': learning_curve_path,
+                'mode': 'train-from-zero',
+                'train_function': train_function,
+                'train_steps': 50000
+            }
+
+# Print to verify
+for key, value in experiments.items():
+    print(key, value)
